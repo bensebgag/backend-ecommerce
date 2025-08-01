@@ -1,0 +1,111 @@
+// This is your Prisma schema file for MySQL database
+// Learn more about Prisma: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model User {
+  Clerkid String   @id
+  role    Role     @default(USER)
+  name    String
+  reviews Review[]
+  bills   Bill[]
+  charts  Chart[]
+
+  @@map("user")
+}
+
+model Product {
+  id             Int            @id @default(autoincrement())
+  name           String
+  category       Category       @relation(fields: [categoryId], references: [id])
+  categoryId     Int
+  price          Float
+  description    String         @db.Text
+  typesChoose    Json?
+  quantity       Int            @default(0)
+  discount       Float          @default(0)
+  reviews        Review[]
+  availableSizes ProductSize[] // Replace both size and sizes fields
+  chartItems     ChartProduct[]
+
+  @@map("product")
+}
+
+model ProductSize {
+  id        Int     @id @default(autoincrement())
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+  size      Int
+  quantity  Int     @default(0) 
+  price     Float?
+  @@unique([productId, size])
+  @@map("product_size")
+}
+
+model Review {
+  id        Int     @id @default(autoincrement())
+  like      Int     @default(0)
+  user      User    @relation(fields: [userId], references: [Clerkid])
+  userId    String
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+
+  @@map("review")
+}
+
+model Bill {
+  id       Int     @id @default(autoincrement())
+  user     User    @relation(fields: [userId], references: [Clerkid])
+  userId   String
+  chart    Chart?  @relation(fields: [chartId], references: [id])
+  chartId  Int?    @unique 
+  Invoice  String
+  createdAt DateTime @default(now()) 
+
+  @@map("bill")
+}
+
+model Chart {
+  id           Int            @id @default(autoincrement())
+  userowner    User           @relation(fields: [userId], references: [Clerkid])
+  userId       String
+  orderAmount  Float
+  discount     Float          @default(0)
+  totalPayment Float
+  products     ChartProduct[]  
+  bill Bill?
+  @@map("chart")
+}
+
+
+model ChartProduct {
+  id        Int     @id @default(autoincrement())
+  chart     Chart   @relation(fields: [chartId], references: [id], onDelete: Cascade)
+  chartId   Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
+  quantity  Int     @default(1)
+
+  @@unique([chartId, productId])
+  @@map("chart_product")
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  products Product[]
+
+  @@map("category")
+}
