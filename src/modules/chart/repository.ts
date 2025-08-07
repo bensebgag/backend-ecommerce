@@ -64,17 +64,39 @@ const delteProduct = async (
         userId,
       },
       include: {
+        products: {
+          include: {
+            product: true,
+          },
+        },
         bill: true,
       },
     });
 
     if (!chart) {
-      throw new Error("Invalid chart ID or unauthorized access");
+      throw new Error("Chart not found or unauthorized access");
     }
+
     if (chart.bill) {
       throw new Error("Cannot modify chart with existing bill");
     }
+
+    if (chart.products.length === 0) {
+      throw new Error("No products in the chart to delete");
+    }
     await prisma.$transaction(async (prisma) => {
+      const productToDelete = chart.products.find(
+        (product) => product.productId === productId
+      )?.product;
+      await prisma.chart.update({
+        where: {
+          id: chart.id,
+        },
+        data: {
+          orderAmount: chart.orderAmount - (productToDelete?.price || 0),
+          totalPayment: chart.totalPayment - (productToDelete?.price || 0),
+        },
+      });
       await prisma.chartProduct.delete({
         where: {
           chartId_productId: {
@@ -83,13 +105,12 @@ const delteProduct = async (
           },
         },
       });
-      await prisma.chart.delete({
-        where: {
-          id: chartId,
-          userId,
-        },
-      });
     });
+
+    return {
+      success: true,
+      message: "Product deleted from chart successfully",
+    };
   } catch (err) {
     throw err;
   }
