@@ -209,8 +209,14 @@ const addProductToChartController = async (
       return res.status(401).json({ error: "User not authenticated" });
     }
     const { id } = req.params;
+    const { size, image } = req.body;
 
-    const addNewProductToChart = await addPoductToChart(userId, +id);
+    const addNewProductToChart = await addPoductToChart(
+      userId,
+      +id,
+      size,
+      image
+    );
 
     return res
       .status(200)

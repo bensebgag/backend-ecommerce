@@ -14,6 +14,8 @@ const create = async (data: CreateChartInput) => {
           create: data.products.map((product) => ({
             productId: product.productId,
             quantity: product.quantity,
+            selectedColr: [product.image],
+            selectedSize: [product.size],
           })),
         },
       },

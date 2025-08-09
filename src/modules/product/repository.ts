@@ -1,4 +1,5 @@
 import prisma from "../../config/db.js";
+import { ensureArray } from "../../util/hellper.js";
 import { createChart } from "../chart/service.js";
 
 const create = async (
@@ -83,7 +84,13 @@ const getById = async (id: number) => {
   });
 };
 
-const addProduct = async (userId: string, productId: number, quantity = 1) => {
+const addProduct = async (
+  userId: string,
+  productId: number,
+  size: number,
+  image: string,
+  quantity = 1
+) => {
   try {
     const product = await prisma.product.findUnique({
       where: { id: productId },
@@ -117,7 +124,7 @@ const addProduct = async (userId: string, productId: number, quantity = 1) => {
         orderAmount: product.price,
         totalPayment: product.price,
         discount: 0,
-        products: [{ productId, quantity }],
+        products: [{ productId, quantity, size, image }],
       });
       return newChart;
     }
@@ -139,12 +146,24 @@ const addProduct = async (userId: string, productId: number, quantity = 1) => {
             activeChart.orderAmount + existProductInChart.product.price,
         },
       });
+
+      const existingColors = ensureArray<string>(
+        existProductInChart.selectedColors
+      );
+      const updatedColors = Array.from(new Set([...existingColors, image]));
+      const existingSizes = ensureArray<number>(
+        existProductInChart.selectedSizes
+      );
+      const updatedSizes = Array.from(new Set([...existingSizes, size]));
+
       const updateQuantity = await prisma.chartProduct.update({
         where: {
           id: existProductInChart.id,
           chartId: activeChart.id,
         },
         data: {
+          selectedColors: updatedColors,
+          selectedSizes: updatedSizes,
           quantity: {
             increment: 1,
           },
@@ -158,7 +177,10 @@ const addProduct = async (userId: string, productId: number, quantity = 1) => {
         chartId: activeChart.id,
         productId: productId,
         quantity: quantity,
+        selectedColors: [image],
+        selectedSizes: [size],
       },
+
       include: {
         product: true,
       },

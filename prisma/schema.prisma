@@ -37,7 +37,7 @@ model Product {
   quantity       Int            @default(0)
   discount       Float          @default(0)
   reviews        Review[]
-  availableSizes ProductSize[] // Replace both size and sizes fields
+  availableSizes ProductSize[] 
   chartItems     ChartProduct[]
 
   @@map("product")
@@ -95,9 +95,10 @@ model ChartProduct {
   chart     Chart   @relation(fields: [chartId], references: [id], onDelete: Cascade)
   chartId   Int
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  selectedColors Json?
+  selectedSizes  Json? 
   productId Int
   quantity  Int     @default(1)
-
   @@unique([chartId, productId])
   @@map("chart_product")
 }
