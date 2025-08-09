@@ -124,7 +124,7 @@ const addProduct = async (userId: string, productId: number, quantity = 1) => {
 
     const existProductInChart = activeChart.products.find(
       (product) => product.product.id === productId
-    )?.product;
+    );
 
     if (existProductInChart) {
       const updateChart = await prisma.chart.update({
@@ -133,8 +133,21 @@ const addProduct = async (userId: string, productId: number, quantity = 1) => {
           userId: userId,
         },
         data: {
-          totalPayment: activeChart.totalPayment + existProductInChart.price,
-          orderAmount: activeChart.orderAmount + existProductInChart.price,
+          totalPayment:
+            activeChart.totalPayment + existProductInChart.product.price,
+          orderAmount:
+            activeChart.orderAmount + existProductInChart.product.price,
+        },
+      });
+      const updateQuantity = await prisma.chartProduct.update({
+        where: {
+          id: existProductInChart.id,
+          chartId: activeChart.id,
+        },
+        data: {
+          quantity: {
+            increment: 1,
+          },
         },
       });
       return updateChart;
