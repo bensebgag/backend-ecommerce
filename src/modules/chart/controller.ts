@@ -1,5 +1,10 @@
 import { Response, Request } from "express";
-import { createChart, delteProductFromChart, getChart } from "./service.js";
+import {
+  createChart,
+  delteProductFromChart,
+  getChart,
+  syncQuantity,
+} from "./service.js";
 import { getAuth } from "@clerk/express";
 
 const createChartController = async (
@@ -128,8 +133,51 @@ const deleteProductFromChartController = async (
   }
 };
 
+const syncQuantityController = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    const { chartProductId } = req.params;
+    const { quantity, opreationType } = req.body;
+    const { userId } = getAuth(req);
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized. User not authenticated.",
+      });
+    }
+
+    if (!chartProductId || !quantity) {
+      return res.status(400).json({
+        success: false,
+        message: "Provide a valid chart product ID and quantity",
+      });
+    }
+
+    const updatedChart = await syncQuantity(
+      +chartProductId,
+      +quantity,
+      opreationType,
+      userId
+    );
+
+    return res.status(200).json({
+      data: updatedChart,
+      message: "Quantity updated successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message:
+        error instanceof Error ? error.message : "Error updating quantity",
+    });
+  }
+};
+
 export {
   createChartController,
   getChartController,
   deleteProductFromChartController,
+  syncQuantityController,
 };

@@ -88,21 +88,30 @@ const delteProduct = async (
       const productToDelete = chart.products.find(
         (product) => product.productId === productId
       )?.product;
-      await prisma.chart.update({
-        where: {
-          id: chart.id,
-        },
-        data: {
-          orderAmount: chart.orderAmount - (productToDelete?.price || 0),
-          totalPayment: chart.totalPayment - (productToDelete?.price || 0),
-        },
-      });
-      await prisma.chartProduct.delete({
+
+      const chartProduct = await prisma.chartProduct.delete({
         where: {
           chartId_productId: {
             chartId,
             productId,
           },
+        },
+        include: {
+          product: true,
+        },
+      });
+
+      await prisma.chart.update({
+        where: {
+          id: chart.id,
+        },
+        data: {
+          orderAmount:
+            chart.orderAmount -
+            chartProduct.product.price * chartProduct.quantity,
+          totalPayment:
+            chart.totalPayment -
+            chartProduct.product.price * chartProduct.quantity,
         },
       });
     });
@@ -116,4 +125,74 @@ const delteProduct = async (
   }
 };
 
-export { create, getByUserId, delteProduct };
+const syncQuantityWithChartProduct = async (
+  prductChartId: number,
+  quantity: number,
+  opreationType: "plus" | "minus",
+  userId: string
+) => {
+  try {
+    const chart = await prisma.chart.findFirst({
+      where: {
+        userId: userId,
+        bill: null,
+      },
+      include: {
+        products: true,
+      },
+    });
+
+    if (!chart) {
+      throw new Error("Chart not found or unauthorized access");
+    }
+
+    const chartProductExists = chart.products.find(
+      (item) => item.id === prductChartId
+    );
+
+    if (!chartProductExists) {
+      throw new Error("Chart product not found");
+    }
+
+    const updatedChartProduct = await prisma.chartProduct.update({
+      where: {
+        id: chartProductExists.id,
+        chartId: chart.id,
+      },
+      data: {
+        quantity,
+      },
+      include: {
+        product: true,
+      },
+    });
+    const priceChange = updatedChartProduct.product.price;
+
+    let updatedData = {};
+
+    if (opreationType === "plus") {
+      updatedData = {
+        totalPayment: chart.totalPayment + priceChange,
+        orderAmount: chart.orderAmount + priceChange,
+      };
+    } else if (opreationType === "minus") {
+      updatedData = {
+        totalPayment: chart.totalPayment - priceChange,
+        orderAmount: chart.orderAmount - priceChange,
+      };
+    }
+    const updateChart = await prisma.chart.update({
+      where: {
+        id: chart.id,
+        userId: userId,
+      },
+      data: updatedData,
+    });
+
+    return updateChart;
+  } catch (err) {
+    throw err;
+  }
+};
+
+export { create, getByUserId, delteProduct, syncQuantityWithChartProduct };

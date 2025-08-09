@@ -1,5 +1,10 @@
 import { CreateChartInput } from "../../util/types.js";
-import { create, getByUserId, delteProduct } from "./repository.js";
+import {
+  create,
+  getByUserId,
+  delteProduct,
+  syncQuantityWithChartProduct,
+} from "./repository.js";
 
 const createChart = async (data: CreateChartInput) => {
   return create(data);
@@ -18,4 +23,23 @@ const delteProductFromChart = async (
     throw err;
   }
 };
-export { createChart, getChart, delteProductFromChart };
+
+const syncQuantity = async (
+  productChartId: number,
+  quantity: number,
+  opreationType: "plus" | "minus",
+  userId: string
+) => {
+  try {
+    return syncQuantityWithChartProduct(
+      productChartId,
+      quantity,
+      opreationType,
+      userId
+    );
+  } catch (err) {
+    throw err;
+  }
+};
+
+export { createChart, getChart, delteProductFromChart, syncQuantity };
