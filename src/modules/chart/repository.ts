@@ -9,13 +9,12 @@ const create = async (data: CreateChartInput) => {
         orderAmount: data.orderAmount,
         discount: data.discount || 0,
         totalPayment: data.totalPayment,
-        billId: data.billId,
         products: {
           create: data.products.map((product) => ({
             productId: product.productId,
             quantity: product.quantity,
-            selectedColr: [product.image],
-            selectedSize: [product.size],
+            selectedColors: [product.image],
+            selectedSizes: [product.size],
           })),
         },
       },
@@ -57,7 +56,7 @@ const getByUserId = async (id: string) => {
 const delteProduct = async (
   userId: string,
   chartId: number,
-  productId: number
+  productId: number,
 ) => {
   try {
     const chart = await prisma.chart.findUnique({
@@ -88,7 +87,7 @@ const delteProduct = async (
     }
     await prisma.$transaction(async (prisma) => {
       const productToDelete = chart.products.find(
-        (product) => product.productId === productId
+        (product) => product.productId === productId,
       )?.product;
 
       const chartProduct = await prisma.chartProduct.delete({
@@ -131,7 +130,7 @@ const syncQuantityWithChartProduct = async (
   prductChartId: number,
   quantity: number,
   opreationType: "plus" | "minus",
-  userId: string
+  userId: string,
 ) => {
   try {
     const chart = await prisma.chart.findFirst({
@@ -149,7 +148,7 @@ const syncQuantityWithChartProduct = async (
     }
 
     const chartProductExists = chart.products.find(
-      (item) => item.id === prductChartId
+      (item) => item.id === prductChartId,
     );
 
     if (!chartProductExists) {

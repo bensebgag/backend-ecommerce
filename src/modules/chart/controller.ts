@@ -6,10 +6,9 @@ import {
   syncQuantity,
 } from "./service.js";
 import { getAuth } from "@clerk/express";
-
 const createChartController = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<any> => {
   try {
     const { orderAmount, discount, totalPayment, billId, products } = req.body;
@@ -54,7 +53,7 @@ const createChartController = async (
 
 const getChartController = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<any> => {
   try {
     const { userId } = getAuth(req);
@@ -78,7 +77,7 @@ const getChartController = async (
         product: {
           ...item.product,
           typesChoose: (item.product.typesChoose as string[]).map((filename) =>
-            filename ? `${host}/images/${filename}` : null
+            filename ? `${host}/images/${filename}` : null,
           ),
         },
       })),
@@ -95,7 +94,7 @@ const getChartController = async (
 
 const deleteProductFromChartController = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<any> => {
   try {
     const idProduct = req.params.idProduct;
@@ -118,7 +117,7 @@ const deleteProductFromChartController = async (
     const chartProduct = await delteProductFromChart(
       userId,
       +chartId,
-      +idProduct
+      +idProduct,
     );
 
     return res.status(200).json({
@@ -135,7 +134,7 @@ const deleteProductFromChartController = async (
 
 const syncQuantityController = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<any> => {
   try {
     const { chartProductId } = req.params;
@@ -160,7 +159,7 @@ const syncQuantityController = async (
       +chartProductId,
       +quantity,
       opreationType,
-      userId
+      userId,
     );
 
     return res.status(200).json({

@@ -11,11 +11,13 @@ import { fileURLToPath } from "url";
 import { clerkMiddleware } from "@clerk/express";
 
 import cors from "cors";
+import { SyncDataUserWithClerk } from "./middleware/SyncDbWithClerk.js";
 dotenv.config();
 
 const app = express();
 
 app.use(clerkMiddleware());
+app.use(SyncDataUserWithClerk);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,20 +34,20 @@ app.use(
   CategoryRoute,
   ReviewsRoute,
   ChartRoute,
-  BillRoute
+  BillRoute,
 );
 
 const errorHandler: express.ErrorRequestHandler = (
   err: Error,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void => {
   if (res.statusCode === 401) {
     res.status(401).send("Unauthenticated!");
     return;
   }
-
+  console.error(err);
   res.status(500).send(err.message);
 };
 

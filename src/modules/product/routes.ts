@@ -11,15 +11,11 @@ import {
 } from "./controller.js";
 
 import express from "express";
-import { ClerkExpressWithAuth } from "@clerk/clerk-sdk-node";
-
 const router = express.Router();
-
-//router.use(ClerkExpressWithAuth())
 router.post(
   "/createNewProduct",
   upload.array("images"),
-  createProductController
+  createProductController,
 );
 router.delete("/deleteProduct/:id", deleteProductController);
 router.get("/getAllProducts/:id", getAllProductsController);

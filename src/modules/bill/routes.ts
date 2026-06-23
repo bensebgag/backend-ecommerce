@@ -4,14 +4,13 @@ import {
   handleStripeWebhook,
   getAllBillController,
 } from "./controller.js";
-import { ClerkExpressWithAuth } from "@clerk/clerk-sdk-node";
 
 const router = express.Router();
 router.post(
   "/webhook",
   express.raw({ type: "application/json" }),
-  handleStripeWebhook
+  handleStripeWebhook,
 );
-router.post("/createNewBill", ClerkExpressWithAuth(), createNewBillController);
-router.get("/getAllBill", ClerkExpressWithAuth(), getAllBillController);
+router.post("/createNewBill", createNewBillController);
+router.get("/getAllBill", getAllBillController);
 export default router;

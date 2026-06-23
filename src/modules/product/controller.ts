@@ -16,7 +16,6 @@ import prisma from "../../config/db.js";
 import multer from "multer";
 import { parseSizeValues } from "../../util/hellper.js";
 import Stripe from "stripe";
-import { promises } from "dns";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || " ");
 
@@ -63,7 +62,7 @@ export const createPaymentIntent = async (req: Request, res: Response) => {
 
 export const getPublickKey = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<any> => {
   try {
     const publicKey = process.env.STRIPE_SECRET_PUBLIC;
@@ -78,7 +77,7 @@ export const getPublickKey = async (
 
 const createProductController = async (
   req: customRequest,
-  res: Response
+  res: Response,
 ): Promise<any> => {
   const { name, price, description, quantity, categoryName, sizeValues } =
     req.body;
@@ -106,7 +105,7 @@ const createProductController = async (
       +quantity,
       categoryName,
       sizeValues,
-      images
+      images,
     );
 
     return res.status(201).json(product);
@@ -120,7 +119,7 @@ const createProductController = async (
 
 const deleteProductController = async (
   req: customRequest,
-  res: Response
+  res: Response,
 ): Promise<any> => {
   const { id } = req.params;
   if (!id) return res.status(500).json("please provide an id");
@@ -151,7 +150,7 @@ const deleteProductController = async (
 
 const getAllProductsController = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<any> => {
   const { id } = req.params;
   try {
@@ -163,7 +162,7 @@ const getAllProductsController = async (
       name: p.name,
       price: p.price,
       typesChoose: (p.typesChoose as string[]).map((filename) =>
-        filename ? `${host}/images/${filename}` : null
+        filename ? `${host}/images/${filename}` : null,
       ),
     }));
     return res.status(200).json(result);
@@ -176,7 +175,7 @@ const getAllProductsController = async (
 
 const getProductByIdController = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<any> => {
   const { id } = req.params;
   const host = `${req.protocol}://${req.get("host")}`;
@@ -187,7 +186,7 @@ const getProductByIdController = async (
     const result = {
       ...Product,
       typesChoose: (Product?.typesChoose as string[]).map((filename) =>
-        filename ? `${host}/images/${filename}` : null
+        filename ? `${host}/images/${filename}` : null,
       ),
     };
     return res.status(200).json(result);
@@ -200,7 +199,7 @@ const getProductByIdController = async (
 
 const addProductToChartController = async (
   req: customRequest,
-  res: Response
+  res: Response,
 ): Promise<any> => {
   try {
     const { userId } = getAuth(req);
@@ -215,7 +214,7 @@ const addProductToChartController = async (
       userId,
       +id,
       size,
-      image
+      image,
     );
 
     return res
@@ -231,7 +230,7 @@ const addProductToChartController = async (
 
 const deleteFromChartController = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<any> => {
   try {
     const { productId } = req.params;
