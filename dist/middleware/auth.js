@@ -1,0 +1,17 @@
+import jwt from "jsonwebtoken";
+export function authenticateToken(req, res, next) {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token)
+        return res.sendStatus(401);
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err)
+            return res.sendStatus(403);
+        if (typeof decoded === "object" && decoded !== null && "id" in decoded) {
+            req.user = decoded;
+            next();
+        }
+        else {
+            return res.status(401).json({ error: "Invalid token format" });
+        }
+    });
+}
