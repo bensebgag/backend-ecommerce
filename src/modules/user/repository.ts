@@ -1,34 +1,30 @@
 import prisma from "../../config/db.js";
 
-const create=async (name:string,Clerkid: string )=>{
+const roleIs = async (Clerkid: string) => {
+  let user = await prisma.user.findUnique({ where: { Clerkid } });
 
-  let user =await prisma.user.findUnique({
-      where:{Clerkid}
-  })
-    if(!user){
-       user= await prisma.user.create({
-        data: {
-            name,
-            Clerkid
-        },
-    });
-    }
-    return user
-}
+  return user;
+};
 
-const roleIs=async (Clerkid:string)=>{
-    let user = await prisma.user.findUnique({where:{Clerkid}});
+const update = async (
+  Clerkid: string,
+  {
+    FirstName,
+    LastName,
+    phoneNumber,
+    imageUrl,
+  }: {
+    FirstName?: string;
+    LastName?: string;
+    phoneNumber?: string;
+    imageUrl?: string;
+  },
+) => {
+  const updatedUser = await prisma.user.update({
+    where: { Clerkid },
+    data: { FirstName, LastName, phoneNumber, imageUrl },
+  });
+  return updatedUser;
+};
 
-    return user
-
-}
-
-
-
-
-
-
-
-
-
-export {create ,roleIs};
+export { roleIs, update };

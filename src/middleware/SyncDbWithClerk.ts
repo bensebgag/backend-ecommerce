@@ -21,7 +21,10 @@ export async function SyncDataUserWithClerk(
         await prisma.user.create({
           data: {
             Clerkid: userId,
-            name: sessionClaims?.name ?? undefined,
+            FirstName: sessionClaims?.FirstName ?? undefined,
+            LastName: sessionClaims?.LastName ?? undefined,
+            phoneNumber: sessionClaims?.phoneNumber ?? undefined,
+            email: sessionClaims?.email ?? undefined,
           },
         });
       }

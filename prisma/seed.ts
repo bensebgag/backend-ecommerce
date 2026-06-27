@@ -48,7 +48,11 @@ async function main() {
     create: {
       Clerkid: "user_2tiLuK4NR3rlzPfUb6hXZ3h0MUa",
       role: Role.USER,
-      name: "Zakaria Babel Hadj",
+      FirstName: "Zakaria",
+      LastName: "Babel Hadj",
+      phoneNumber: "123-456-7890",
+      email: "zakaria.babel.hadj@example.com",
+      imageUrl: "https://example.com/zakaria.jpg",
     },
   });
 
@@ -58,7 +62,11 @@ async function main() {
     create: {
       Clerkid: "user_2ti6UNOK6L27VfRHgtqxQdzRnQ3",
       role: Role.ADMIN,
-      name: "Ben Sbgag",
+      FirstName: "bensebgag",
+      LastName: "Admin",
+      phoneNumber: "098-765-4321",
+      email: "admin@example.com",
+      imageUrl: "https://example.com/admin.jpg",
     },
   });
 

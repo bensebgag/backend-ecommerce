@@ -1,33 +1,8 @@
-import { creteUser, roleUserIs } from "./service.js";
+import { roleUserIs, updateUser } from "./service.js";
 import { Request, Response } from "express";
-import { getAuth } from "@clerk/express";
-
-const createUserController = async (
-  req: Request,
-  res: Response,
-): Promise<any> => {
-  const { name, Clerkid } = req.body;
-  if (!name) {
-    res.status(400).json({ message: "Name are required." });
-  }
-
-  if (!Clerkid) {
-    res.status(400).json({ message: " login required" });
-  }
-
-  try {
-    const newUser = await creteUser(name, Clerkid);
-    return res.status(201).json({
-      message: "User created successfully",
-      user: newUser,
-    });
-  } catch (error: any) {
-    return res.status(500).json({
-      message: "Internal server error while creating user",
-      error: error.message,
-    });
-  }
-};
+import { clerkClient, getAuth } from "@clerk/express";
+import { User } from "@prisma/client";
+import prisma from "../../config/db.js";
 
 const roleUserIsController = async (
   req: Request,
@@ -47,4 +22,68 @@ const roleUserIsController = async (
   }
 };
 
-export { createUserController, roleUserIsController };
+async function updateUserController(
+  req: Request,
+  res: Response,
+): Promise<User | any> {
+  try {
+    const { userId } = getAuth(req);
+    if (!userId) {
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+    const { FirstName, LastName, phoneNumber } = req.body;
+    const updatedUser = await updateUser(userId, {
+      FirstName,
+      LastName,
+      phoneNumber,
+    });
+
+    if (updatedUser) {
+      await clerkClient.users.updateUser(userId, {
+        firstName: FirstName,
+        lastName: LastName,
+      });
+
+      return res.status(200).json({ ...updatedUser });
+    }
+    res.status(404).json({ error: "User not updated" });
+  } catch (err) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+async function updateProfileImageController(
+  req: Request,
+  res: Response,
+): Promise<any> {
+  try {
+    const { userId } = getAuth(req);
+    if (!userId) {
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+    const blob = new Blob([new Uint8Array(req.file.buffer)], {
+      type: req.file.mimetype,
+    });
+
+    const updatedUser = await clerkClient.users.updateUserProfileImage(userId, {
+      file: blob,
+    });
+    const imageUrl = updatedUser.imageUrl;
+    await prisma.user.update({
+      where: { Clerkid: userId },
+      data: { imageUrl },
+    });
+    return res.status(200).json({ message: "Profile image updated", imageUrl });
+  } catch (err) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+export {
+  roleUserIsController,
+  updateUserController,
+  updateProfileImageController,
+};

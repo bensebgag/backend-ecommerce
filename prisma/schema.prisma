@@ -18,7 +18,11 @@ enum Role {
 model User {
   Clerkid String   @id
   role    Role     @default(USER)
-  name    String
+  FirstName    String
+  LastName     String
+  phoneNumber  String
+  email        String   @unique
+  imageUrl     String?
   reviews Review[]
   bills   Bill[]
   charts  Chart[]
