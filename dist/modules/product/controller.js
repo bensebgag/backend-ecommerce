@@ -64,7 +64,7 @@ const createProductController = async (req, res) => {
   const { name, price, description, quantity, categoryName, sizeValues } =
     req.body;
   const images = req.files && req.files.map((file) => file.filename);
-  const numericSizes = parseSizeValues(sizeValues);
+  /* const numericSizes = parseSizeValues(sizeValues); */
   const { userId } = getAuth(req);
   if (!userId) {
     return res.status(401).json({ error: "User not authenticated" });
